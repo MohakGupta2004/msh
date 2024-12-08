@@ -2,6 +2,13 @@
 #include <string.h>
 #include<stdbool.h>
 int main(int argc, char *argv[]) {
+  if(argc == 2){
+	char *arg = argv[1];
+	if(strncmp(arg, "PATH=", 5)==0){
+		char *value = arg+5;
+		
+	}
+  }
   while(true){
 	printf("$ ");
   	fflush(stdout);
@@ -13,6 +20,7 @@ int main(int argc, char *argv[]) {
 		break;
 	}
 	char *token = strtok(input, " ");
+	
 	char echo[] = "echo";
 	char exit[] = "exit";
 	char type[] = "type";
@@ -43,5 +51,6 @@ int main(int argc, char *argv[]) {
 	}
 	
   }
+
   return 0;
 }
