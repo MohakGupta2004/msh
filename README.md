@@ -1,170 +1,92 @@
-# msh - Minimal Shell (in C)
+# msh (Simple Shell)
 
-## Overview
-
-**`msh`** (short for *Minimal Shell*) is a simple, interactive command-line shell implemented in C. The purpose of this project is to build a minimal shell from scratch, covering basic shell functionalities such as executing commands, managing processes, and handling simple user input/output. This project is designed for learning and understanding the internal workings of a shell, such as process creation, file descriptors, and system calls in a Unix-like operating system.
-
-This project was inspired by the [Codecrafters.io shell tutorial](https://codecrafters.io), where I learned how to implement fundamental shell features and build my own shell step by step.
-
----
+`msh` is a simple shell program implemented in C that handles basic built-in commands such as `echo`, `exit`, and `type`, along with the ability to execute external commands by searching for them in the system's `PATH`. The shell supports command-line parsing, forking processes, and executing commands.
 
 ## Features
 
-- **Command Execution**: 
-  - Execute system commands using `fork()` and `execvp()`.
-  - Supports external commands (e.g., `ls`, `echo`, etc.).
-  
 - **Built-in Commands**: 
-  - Supports built-in commands such as `cd` for changing directories and `exit` for terminating the shell.
+  - `echo`: Prints arguments to the terminal.
+  - `exit`: Exits the shell.
+  - `type`: Displays the type (built-in or path) of the given command.
   
-- **Input Handling**: 
-  - Reads user input using `fgets()` and processes it.
-  
-- **Process Management**: 
-  - Executes commands in child processes using `fork()`.
-  - Handles waiting for processes to finish using `waitpid()`.
-  
-- **Pipes and Redirection** (optional):
-  - Future support for command piping (`|`) and file input/output redirection (e.g., `command > file.txt`).
-  
-- **Background Processes**:
-  - Run commands in the background using the `&` symbol (e.g., `sleep 10 &`).
-  
-- **Environment Variables**:
-  - Handles environment variables (e.g., `$HOME`, `$PATH`).
+- **External Command Execution**: 
+  - Executes external commands by searching for them in the system's `PATH`.
+  - Forks a child process to execute commands.
 
----
+## Compilation
 
-## Installation
+To compile the program, use the following `gcc` command:
 
-1. Clone the repository to your local machine:
-   ```bash
-   git clone https://github.com/yourusername/msh.git
-   ```
+```bash
+gcc -o msh main.c
+```
 
-2. Navigate to the project directory:
-   ```bash
-   cd msh
-   ```
-
-3. Build the shell by compiling the source code:
-   ```bash
-   make
-   ```
-
-4. Run the shell:
-   ```bash
-   ./msh
-   ```
-
----
+This will produce an executable file named `msh`.
 
 ## Usage
 
-Once the shell is running, you will see the prompt `msh$`. You can start typing commands just like any other shell.
+After compiling the program, you can run the shell by executing the following command in your terminal:
 
-### Examples
-
-- **Run a command**:
-  ```sh
-  msh$ ls
-  ```
-  This will list the files in the current directory.
-
-- **Run a command with arguments**:
-  ```sh
-  msh$ echo "Hello, World!"
-  ```
-  This will output `Hello, World!`.
-
-- **Change directories**:
-  ```sh
-  msh$ cd /path/to/directory
-  ```
-
-- **Run a command in the background**:
-  ```sh
-  msh$ sleep 10 &
-  ```
-
-- **Exit the shell**:
-  ```sh
-  msh$ exit
-  ```
-
----
-
-## How It Works
-
-The shell follows a basic structure to process commands and interact with the user:
-
-1. **Input Handling**: 
-   - The shell continuously prompts for user input, reading commands using `fgets()` or `getline()`.
-
-2. **Command Parsing**: 
-   - The input is parsed to identify the command and its arguments.
-
-3. **Process Creation**:
-   - The shell uses `fork()` to create a child process.
-   - In the child process, `execvp()` is used to run the command with arguments.
-   - The parent process waits for the child to finish using `waitpid()`.
-
-4. **Built-in Commands**:
-   - If the command is a built-in (e.g., `cd`, `exit`), the shell executes it directly without forking a new process.
-
-5. **Background Processes**:
-   - If the command includes `&` at the end, the shell creates the child process and does not wait for it to finish.
-
-6. **Error Handling**:
-   - The shell handles errors such as command not found or invalid arguments.
-
----
-
-## Future Features
-
-- **Pipes**: Support for piping commands (e.g., `ls | grep txt`).
-- **Redirection**: Support for file redirection (e.g., `command > file.txt` or `command < input.txt`).
-- **Job Control**: Add job control to manage background processes.
-- **Command History**: Implement command history to store and retrieve previously entered commands.
-- **Tab Completion**: Implement basic tab-completion for commands and file paths.
-- **Aliases**: Allow users to define custom aliases for commands.
-
----
-
-## Project Structure
-
-```
-msh/
-├── msh.c              # Main shell program
-├── builtins.c         # Implementation of built-in commands (e.g., cd, exit)
-├── utils.c            # Helper functions (e.g., input parsing, process handling)
-├── Makefile           # Makefile to build the project
-├── README.md          # Project documentation
-└── .gitignore         # Git ignore file
+```bash
+./msh
 ```
 
----
+This will start the interactive shell prompt, where you can type commands.
 
-## Contributing
+### Available Commands
 
-Feel free to fork this project, submit issues, or create pull requests. Contributions to enhance the functionality of the shell are welcome! If you have ideas for new features or improvements, please submit an issue or open a pull request.
+1. **`echo <text>`**:
+   - Prints the provided text to the console.
+   
+   Example:
+   ```bash
+   $ echo Hello World
+   Hello World
+   ```
 
----
+2. **`exit`**:
+   - Exits the shell.
+
+   Example:
+   ```bash
+   $ exit
+   ```
+
+3. **`type <command>`**:
+   - Displays the type of the command (`builtin` or path to the executable).
+   
+   Example:
+   ```bash
+   $ type ls
+   ls is /bin/ls
+   ```
+
+4. **External Commands**:
+   - Any other command is treated as an external command. The shell will search for the command in the directories listed in the `PATH` environment variable and execute it if found.
+   
+   Example:
+   ```bash
+   $ ls
+   ```
+
+### Error Handling
+
+- If a command is not found, the shell will display an error message:
+  ```bash
+  $ nonexistent_command
+  nonexistent_command: command not found
+  ```
+
+- If the `type` command is used without any arguments:
+  ```bash
+  $ type
+  type: missing operand
+  ```
 
 ## License
 
-This project is open-source and available under the MIT License. See the [LICENSE](LICENSE) file for more details.
+This project is licensed under the MIT License.
 
----
+## Contributing
 
-### Acknowledgements
-
-- The `msh` shell project was inspired by the **Codecrafters.io** tutorial series on building a shell in C. It helped me understand key concepts related to system calls, process management, and low-level programming in C.
-
----
-
-### Final Notes
-
-By building this shell, I gained a deep understanding of how shells work internally and how the operating system handles processes. This project was a great exercise in learning system programming, especially working with processes and system calls in Unix-like systems.
-
-Let me know if you have any suggestions or questions. Happy coding! 🚀
+Feel free to fork this repository and submit pull requests with improvements or bug fixes!
