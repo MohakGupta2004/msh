@@ -4,7 +4,8 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <stdlib.h>
-
+#include <sys/types.h>
+#include <sys/wait.h>
 #define MAX_PATH_LENGTH 1024
 
 static char full_path[MAX_PATH_LENGTH];
@@ -13,7 +14,6 @@ static char full_path[MAX_PATH_LENGTH];
 int is_executable(const char *path) {
     return access(path, X_OK) == 0;  // Return 0 if executable
 }
-
 // Function to get the full path of a command by searching through the PATH
 char *get_full_path_from_command(const char *cmd) {
     const char *path = getenv("PATH");
@@ -60,6 +60,22 @@ void handle_type_command(const char *cmd) {
     }
 }
 
+
+void execute(char **cmd, char *path) {
+  pid_t pid = fork();
+  if(pid == 0){
+    execv(path, cmd);
+    printf("\n");
+    perror("execv");
+    exit(1);
+  } else if(pid<0){
+    perror("fork");
+  } else {
+    int status;
+    waitpid(pid, &status, 0);
+  }
+}
+
 int main() {
     while (1) {
         printf("$ ");
@@ -77,33 +93,30 @@ int main() {
         // Exit if input is "exit"
         if (strcmp(input, "exit 0") == 0) {
             break;
-        }
-
+        } 
         char *token = strtok(input, " ");
-        while (token != NULL) {
-            if (strcmp(token, "exit") == 0) {
-                break;
-            } else if (strcmp(token, "echo") == 0) {
-                token = strtok(NULL, " ");
-		while(token!=NULL){
-			printf("%s", token);
-			token = strtok(NULL," ");
-			if(token!=NULL){
-				printf(" ");
-			}	
-		}
-		printf("\n");
-            } else if (strcmp(token, "type") == 0) {
-                token = strtok(NULL, " ");
-                if (token) {
-                    handle_type_command(token);
-                    break;  // Break the loop after handling the type command
-                }
-            } else {
-                printf("%s: command not found\n", token);
-            }
-            token = strtok(NULL, " ");
+        char *args[100];
+        int argc = 0;
+        while(token!=NULL && argc<99){
+          args[argc++] = token;
+          token = strtok(NULL, " ");
         }
+        args[argc] = NULL;
+        if (strcmp(args[0], "exit") == 0) {
+            break;
+        } else if (strcmp(args[0], "echo") == 0) {
+          for(int i=1;i<argc;i++){
+            printf("%s ", args[i]);
+          }
+          printf("\n");
+       } else if (strcmp(args[0], "type") == 0) {
+            handle_type_command(args[1]);
+        } else{ 
+          char *path = get_full_path_from_command(args[0]);
+          if(path){
+            execute(args, path);
+          }else printf("%s: command not found\n", args[0]);
+        } 
     }
 
     return 0;
