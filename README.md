@@ -14,6 +14,10 @@
   - Forks a child process to execute commands.
 
 ## Compilation
+To run the program, use the following `make` command:
+```bash
+make run
+```
 
 To compile the program, use the following `gcc` command:
 
